@@ -7,10 +7,14 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.testng.Assert;
 import pages.AutoTestPracPage;
+import utils.PropertyUtil;
+import java.io.File;
 
 public class AutoPracTestStepDef {
 
     AutoTestPracPage autoTestPracPage = new AutoTestPracPage(DriverManager.getDriver());
+    String path = PropertyUtil.getInstance().get("test.file");
+    final String absPath = new File(path).getAbsolutePath();
 
     @Given("User should navigate to Automation Practice Page")
     public void user_should_navigate_to_Page() {
@@ -50,5 +54,32 @@ public class AutoPracTestStepDef {
         String date2 = autoTestPracPage.valueOfDate2();
         Assert.assertNotNull(date1);
         Assert.assertNotNull(date2);
+    }
+
+    @And("Handle dynamic button, and alerts using {string}")
+    public void handleDynamicButtonAndAlertsUsing(String arg0) {
+        autoTestPracPage.clickStart();
+        autoTestPracPage.clickStop();
+        autoTestPracPage.clickOkSimpleAlert();
+        autoTestPracPage.clickOkConfirmationAlert();
+        autoTestPracPage.enterTextOnPromptAlert(arg0);
+    }
+
+    @And("Handle double click, drag & drop and slide")
+    public void handleDoubleClickDragDropAndSlide() {
+        autoTestPracPage.clickCopyText();
+        autoTestPracPage.dragAndDrop();
+        autoTestPracPage.slidePriceRange(60, 5);
+    }
+
+    @And("Upload files and submit")
+    public void uploadFilesAndSubmit() {
+        autoTestPracPage.singleFileUpload(absPath);
+    }
+
+    @And("Complete all actions of shadow dom")
+    public void completeAllActionsOfShadowDom() {
+        autoTestPracPage.inputShadowDom("test auto");
+        autoTestPracPage.chooseFileShadowDom(absPath);
     }
 }

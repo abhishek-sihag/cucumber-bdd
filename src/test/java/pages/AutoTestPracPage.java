@@ -48,7 +48,8 @@ public class AutoTestPracPage extends BasePage {
     public static final By SUBMIT_SECTION3 = By.id("btn3");
     public static final By TABS_INPUT = By.id("Wikipedia1_wikipedia-search-input");
     public static final By TABS_SEARCH = By.className("wikipedia-search-button");
-    public static final By DYNAMIC_BTN = By.xpath("//button[@name='start']");
+    public static final By START_BTN = By.xpath("//button[@name='start']");
+    public static final By STOP_BTN = By.cssSelector(".stop");
     public static final By SIMPLE_ALERT = By.id("alertBtn");
     public static final By CONFIRMATION_ALERT = By.id("confirmBtn");
     public static final By PROMPT_ALERT = By.id("promptBtn");
@@ -248,7 +249,11 @@ public class AutoTestPracPage extends BasePage {
     }
 
     public void clickStart(){
-        click(DYNAMIC_BTN);
+        click(START_BTN);
+    }
+
+    public void clickStop(){
+        click(STOP_BTN);
     }
 
     public void clickOkSimpleAlert(){
@@ -259,7 +264,7 @@ public class AutoTestPracPage extends BasePage {
         clickOkAlert(CONFIRMATION_ALERT);
     }
 
-    public void enterTextOnConfirmationAlert(String text){
+    public void enterTextOnPromptAlert(String text){
         promptAlert(PROMPT_ALERT, text);
     }
 
