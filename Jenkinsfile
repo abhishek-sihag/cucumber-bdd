@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'     // name configured in Jenkins → Global Tool Config
-        jdk 'JDK17'       // name configured in Jenkins
+        maven 'Maven'
+        jdk 'JDK17'
     }
 
     stages {
@@ -20,15 +20,21 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Smoke Tests') {
             steps {
-                bat 'mvn test'
+                bat 'mvn test -Dcucumber.filter.tags="@smoke"'
             }
         }
 
-        stage('Generate Reports') {
+        stage('Run Sanity Tests') {
             steps {
-                bat 'mvn verify'
+                bat 'mvn test -Dcucumber.filter.tags="@sanity"'
+            }
+        }
+
+        stage('Run Regression Tests') {
+            steps {
+                bat 'mvn test -Dcucumber.filter.tags="@regression"'
             }
         }
     }
