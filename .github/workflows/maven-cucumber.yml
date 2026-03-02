@@ -24,8 +24,14 @@ jobs:
       - name: Build Project
         run: mvn clean install -DskipTests
 
-      - name: Run TestNG Suite
-        run: mvn test
+      - name: Run Smoke Tests
+        run: mvn test -Dcucumber.filter.tags="@smoke"
+
+      - name: Run Sanity Tests
+        run: mvn test -Dcucumber.filter.tags="@sanity"
+
+      - name: Run Regression Tests
+        run: mvn test -Dcucumber.filter.tags="@regression"
 
       - name: Upload Reports
         if: always()
