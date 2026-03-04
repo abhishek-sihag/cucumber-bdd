@@ -37,6 +37,12 @@ pipeline {
                 bat 'mvn test -Dcucumber.filter.tags="@regression"'
             }
         }
+
+        stage('Run API Tests') {
+            steps {
+                bat 'mvn test -Dcucumber.filter.tags="@api"'
+            }
+        }
     }
 
     post {
