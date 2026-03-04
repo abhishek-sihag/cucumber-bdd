@@ -30,6 +30,9 @@ jobs:
       - name: Run Sanity Tests
         run: mvn test -Dcucumber.filter.tags="@sanity"
 
+      - name: Run API Tests
+        run: mvn test -Dcucumber.filter.tags="@api"
+
       - name: Run Regression Tests
         run: mvn test -Dcucumber.filter.tags="@regression"
 
