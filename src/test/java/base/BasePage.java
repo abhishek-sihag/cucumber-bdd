@@ -50,22 +50,50 @@ public class BasePage {
         element.clickElement(by);
     }
 
+    public void click(WebElement e) {
+        element.clickElement(e);
+    }
+
+    public void clickNoWait(By by) {
+        element.clickNoWait(by);
+    }
+
+    public void clickAllElements(List<WebElement> elementList) {
+        if (elementList == null || elementList.isEmpty()) {
+            throw new IllegalArgumentException("Element list cannot be null or empty");
+        }
+        actions.keyDown(Keys.CONTROL);
+        elementList.forEach(actions::click);
+        actions.keyUp(Keys.CONTROL).build().perform();
+    }
+
+    public void scrollTo(By by) {
+        WebElement e = WaitUtil.waitForPresenceOfElement(driver,by);
+        actions.scrollToElement(e).build().perform();
+    }
+
     public void dblClick(By by) {
-        actions.moveToElement(element.findElement(by)).doubleClick().perform();
+        actions.moveToElement(element.findElement(by)).doubleClick().build().perform();
     }
 
     public boolean isSelected(By by) {
         return element.findElement(by).isSelected();
     }
 
+    public boolean isElementChecked(WebElement element) {
+        return element.isSelected() ||
+                element.getAttribute("class").contains("checked") ||
+                "true".equals(element.getAttribute("aria-checked"));
+    }
+
     public void check(By by) {
         WebElement e = webElement(by);
-        if(!e.isSelected()) e.click();
+        if(!isElementChecked(e)) e.click();
     }
 
     public void uncheck(By by) {
         WebElement e = webElement(by);
-        if(e.isSelected()) e.click();
+        if(isElementChecked(e)) e.click();
     }
 
     public void enterText(By by, String text) {
@@ -84,6 +112,10 @@ public class BasePage {
         element.selectByVisibleText(by, opt);
     }
 
+    public void selectOptionByValue(By by, String value) {
+        element.selectByValue(by, value);
+    }
+
     public void multipleOptionsSelect(By by, List<String> opts) {
         element.multiSelect(by, opts);
     }
@@ -92,24 +124,24 @@ public class BasePage {
         actions.dragAndDrop(element.findElement(src), element.findElement(destination));
     }
 
-    public void hover(By by){
+    public void hover(By by) {
         actions.moveToElement(element.findElement(by)).perform();
-        LOG.info("hovered on: {}",by);
+        LOG.info("hovered on: {}", by);
     }
 
-    public void scrollToLocator(By by){
+    public void scrollToLocator(By by) {
         actions.scrollToElement(element.findElement(by)).build().perform();
-        LOG.info("scrollToElement: {} completed!",by);
+        LOG.info("scrollToElement: {} completed!", by);
     }
 
-    public void slide(By by, int xOffset, int yOffset){
+    public void slide(By by, int xOffset, int yOffset) {
         actions.clickAndHold(element.findElement(by))
                 .moveByOffset(xOffset, yOffset)
                 .release().perform();
         LOG.info("clickAndHold: {} and moveByOffset x:{} y:{}",by, xOffset, yOffset);
     }
 
-    public void clickScrollAndSelect(By click, By dropdown, By target){
+    public void clickScrollAndSelect(By click, By dropdown, By target) {
         actions.moveToElement(element.findElement(click)).click()
                 .perform();
         LOG.info("scrolled to: {}", click);
@@ -119,7 +151,7 @@ public class BasePage {
         LOG.info("moveToElement: {} scrollToElement: {}; completed!", dropdown, target);
     }
 
-    public boolean isDisplayed(By by){
+    public boolean isDisplayed(By by) {
         return WaitUtil.waitIgnoringStale(driver, by);
     }
 
@@ -143,7 +175,7 @@ public class BasePage {
         uploadFile(by, stringPaths);
     }
 
-    public List<Map<String, String>> tableData(By table){
+    public List<Map<String, String>> tableData(By table) {
         WebElement h = element.findElement(table);
         List<WebElement> head = h.findElements(By.tagName("th"));
         List<String> headers = head
@@ -152,7 +184,7 @@ public class BasePage {
                 .toList();
         List<WebElement> rows = h.findElements(By.tagName("tr"));
         return rows.stream().skip(1)
-                .map(row->{
+                .map(row -> {
                     List<String> cell = row.findElements(By.tagName("td"))
                             .stream().map(WebElement::getText).toList();
                     LOG.debug("cell: {}", cell);
@@ -163,7 +195,7 @@ public class BasePage {
                 }).toList();
     }
 
-    public void selectDateFromCalendar(By by, String ddmmyyyy){
+    public void selectDateFromCalendar(By by, String ddmmyyyy) {
         click(by);
         String d = ddmmyyyy.substring(0,2);
         if(d.startsWith("0")) d = d.substring(1);

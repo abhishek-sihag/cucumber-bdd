@@ -35,6 +35,13 @@ public class WaitUtil {
                 ));
     }
 
+    public static WebElement waitForElementToBeClickable(WebDriver driver, WebElement e){
+        return new WebDriverWait(driver, Duration.ofSeconds(explicitTimeout))
+                .until(ExpectedConditions.refreshed(
+                        ExpectedConditions.elementToBeClickable(e)
+                ));
+    }
+
     public static WebElement waitForPresenceOfElement(WebDriver driver, By by){
         return new WebDriverWait(driver, Duration.ofSeconds(explicitTimeout))
                 .until(ExpectedConditions.refreshed(

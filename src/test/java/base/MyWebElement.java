@@ -11,7 +11,10 @@ public interface MyWebElement {
     public WebElement findElement(By by);
     public List<WebElement> findElements(By by);
     public void clickElement(By by);
+    public void clickElement(WebElement e);
+    public void clickNoWait(By by);
     public void selectByVisibleText(By by, String text);
+    public void selectByValue(By by, String text);
     public void multiSelect(By by, List<String> opts);
     public String currentWindow();
     public Set<String> allWindows();

@@ -1,5 +1,6 @@
 package base;
 
+import io.cucumber.java.eo.Se;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
@@ -7,6 +8,7 @@ import org.openqa.selenium.support.ui.Select;
 import utils.PropertyUtil;
 import utils.WaitUtil;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +20,7 @@ public class MyWebElementImpl implements MyWebElement {
     private Select select;
 
     static final String MAXIMUM_RETRY = PropertyUtil.getInstance().get("max.retry");
+    private final int maxRetry = Integer.parseInt(MAXIMUM_RETRY);
 
     public MyWebElementImpl(WebDriver driver) {
         this.driver = driver;
@@ -26,6 +29,11 @@ public class MyWebElementImpl implements MyWebElement {
     @Override
     public void selectByVisibleText(By by, String text) {
         new Select(findElement(by)).selectByVisibleText(text);
+    }
+
+    @Override
+    public void selectByValue(By by, String text) {
+        new Select(findElement(by)).selectByValue(text);
     }
 
     private Select ensureMultiSelect(By by) {
@@ -57,53 +65,79 @@ public class MyWebElementImpl implements MyWebElement {
 
     @Override
     public List<WebElement> findElements(By by) {
-        try {
-            List<WebElement> we = WaitUtil.waitForVisibilityOfElements(driver, by);
-            if(!we.isEmpty()) {
-                LOG.debug("\t\tfindPageElements found:{} elements for: {}", we.size(), by.toString());
-            }else {
-                LOG.warn("\tNo elements found for: {}", by.toString());
+        int retry = 0;
+        while (retry < maxRetry) {
+            try {
+                List<WebElement> elements = WaitUtil.waitForVisibilityOfElements(driver, by);
+                if (!elements.isEmpty()) {
+                    LOG.debug("findElements found {} elements for: {}", elements.size(), by);
+                } else {
+                    LOG.warn("No elements found for: {}", by);
+                }
+                return elements;
+            } catch (TimeoutException | StaleElementReferenceException e) {
+                retry++;
+                LOG.warn("Retry {}/{} - Unable to locate elements: {}", retry, maxRetry, by);
+            } catch (InvalidSelectorException e) {
+                LOG.error("Invalid locator: {}", by, e);
+                throw e;
             }
-            return we;
-        }catch (TimeoutException e){
-            LOG.error("Timeout locating elements: {}", by, e);
-            return null;
-        } catch (InvalidSelectorException e) {
-            LOG.error("Invalid locators: {}", by, e);
-            throw e;
         }
+        LOG.error("Elements not found after {} retries: {}", maxRetry, by);
+        return Collections.emptyList();
     }
 
     @Override
     public WebElement findElement(By by) {
-        try {
-            WebElement element = WaitUtil.waitForVisibilityOfElement(driver, by);
-            LOG.debug("\t\tfindElement completed for: {}", by.toString());
-            return element;
-        } catch (TimeoutException e) {
-            LOG.error("Timeout locating element: {}", by, e);
-            return null;
-        } catch (InvalidSelectorException e) {
-            LOG.error("Invalid locator: {}", by, e);
-            throw e;
+        int retry = 1;
+        while (retry < maxRetry) {
+            try {
+                WebElement element = WaitUtil.waitForVisibilityOfElement(driver, by);
+                LOG.debug("findElement success on attempt {} for: {}", retry, by);
+                return element;
+            } catch (TimeoutException | StaleElementReferenceException e) {
+                retry++;
+                LOG.warn("Retry {}/{} - Unable to locate element: {}", retry, maxRetry, by);
+            } catch (InvalidSelectorException e) {
+                LOG.error("Invalid locator: {}", by, e);
+                throw e;
+            }
         }
+        throw new NoSuchElementException("Element not found after " + maxRetry + " attempts: " + by);
     }
 
     @Override
     public void clickElement(By by){
-        int maxRetry = Integer.parseInt(MAXIMUM_RETRY);
-        for(int i = 1; i <= maxRetry; i++) {
+        int retry = 1;
+        while(retry < maxRetry) {
             try {
                 WaitUtil.waitForElementToBeClickable(driver, by).click();
                 LOG.info("\t\tClick attempt on: {} successful!", by);
                 return;
             } catch (Exception e) {
-                if(i==maxRetry){
-                    LOG.warn("\tClick failed after attempt #{} for locator: {}", i, by);
-                    throw new ElementClickInterceptedException("Click failed on: " + by, e);
-                }
+                retry++;
             }
         }
+    }
+
+    @Override
+    public void clickElement(WebElement element) {
+        int retry = 1;
+        while(retry < maxRetry) {
+            try {
+                WaitUtil.waitForElementToBeClickable(driver, element).click();
+                LOG.info("\t\tClick attempt: {} successful!", element);
+                return;
+            } catch (Exception e) {
+                retry++;
+            }
+        }
+    }
+
+    @Override
+    public void clickNoWait(By by) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].click();", by);
     }
 
     @Override
