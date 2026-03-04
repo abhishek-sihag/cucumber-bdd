@@ -64,7 +64,7 @@ public final class PropertyUtil {
 
     private void loadBaseProperties(){
         loadFile("src/test/resources/properties/default.properties");
-        loadFile("src/test/resources/properties/apiSpec.properties");
+        loadFile("src/test/resources/properties/apiSpecs.properties");
         loadFile("src/test/resources/properties/db.properties");
         loadFile("application.properties");
     }
